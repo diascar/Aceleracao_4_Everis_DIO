@@ -4,16 +4,20 @@
 
 * Nó de um cluster HDFS responsável por gerenciar o sistema de arquivos e regular o acesso dos clientes aos arquivos. Ele é o responsável operações como abrir, fechar e renomear arquivos ou pastas.
 
-sudo service hadoop-hdfs-namenode start
+`sudo service hadoop-hdfs-namenode start`
+
 
 ## ativando o Namenode secundário
-sudo service hadoop-hdfs-secondarynamenode start
+
+`sudo service hadoop-hdfs-secondarynamenode start`
+
 
 ## ativando o datanode
 
 * Os DataNodes são responsáveis por gerenciar o aramazenamento do nó em que se encontram. Afinal, neles os dados estão fisicamente armazenados.
 
-sudo service hadoop-hdfs-datanode start
+`sudo service hadoop-hdfs-datanode start`
+
 
 ## Ativando MapReduce History Server:
 * permite ao usuário obter informações sobre aplicações concluídas)
@@ -24,14 +28,17 @@ O YARN separa as tarefas de gerenciamento de recursos e agendamento de jobs em d
 
 ## Ativando o YARN ResourceManager
 * gerencia o recurso que será distribuído **entre todas as aplicações do sistema**.
-sudo service hadoop-yarn-resource-manager start
+
+`sudo service hadoop-yarn-resource-manager start`
+
 
 ## Ativando o YARN NodeManager
 * é o framework responsável pelos "conteiners" e por gerenciar recursos **por máquina**, monitorandoo os recursos usados e reportando o ResourceManager.
-sudo service hadoop-yarn-nodemanager start
+
+`sudo service hadoop-yarn-nodemanager start`
+
 
 ## Comandos HDFS
-
 Uma vez que todos os serviços já tenham sido iniciados, estamos prontos para brincar com o framework Hadoop.
 
 ### vamos começar criando um arquivo vazio
@@ -48,7 +55,7 @@ ou
 
 O último comando irá exibir na tela o seguinte conteúdo:
 
--rw-r--r--   3 usuario grupo       0 2021-01-20 07:22 texto.txt
+`-rw-r--r--   3 usuario grupo       0 2021-01-20 07:22 texto.txt`
 
 O número 3 (na coluna entre as permissões e o nome do usuário) indica o **fator de replicação** do arquivo (isso significa que existem 3 cópias de cada bloco deste arquivo).
 
@@ -62,7 +69,7 @@ Certo, mas onde são armazenados os blocos? No sistema de arquivos local! Essa i
 
 Podemos criar um arquivo localmente e enviá-lo para a pasta que acabmos de criar no HDFS.
 
-`touch arquivo2.txt` # cria arquivo no FS local
+`touch arquivo2.txt` -  cria arquivo no FS local
 
 `hdfs dfs -copyFromLocal arquivo2.txt test-folder`
 
