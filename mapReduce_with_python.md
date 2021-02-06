@@ -24,7 +24,7 @@ Vamos precisar de dois programas: um *mapper* e um *reducer* (este não é estri
 
 ### Mapper
 
-```python
+~~~python
 #!/usr/local/bin/python3.7
 import sys
 import re
@@ -33,7 +33,7 @@ for i,line in enumerate(sys.stdin):
         if line.startswith("("):
                 l = re.split("[\(\)]", line.strip())[1].replace(',', '|')
                 print(f"{i}\t{l}")
-```
+~~~
 
 O código acima deve retornar (386) linhas com o seguinte formato:
 
@@ -53,14 +53,14 @@ Aqui, estamos apenas selecionando a segunda coluna (ou seja, descartando a chave
 
 Uma vez definidos os nossos programas, podemos colocar a mão na massa e rodar o nosso job de MapReduce usando o python.
 
-```bash
+~~~bash
 hadoop jar /usr/lib/hadoop-mapreduce/hadoop-streaming.jar\
 -D mapred.reduce.tasks=1 \
 -input pokemon.sql -output PastaSaida \
 -mapper map.py \
 -file /home/everis/sqoop_handson/map.py \
---reducer "cut -f 2"
-```
+-reducer "cut -f 2"
+~~~
 
 
 **hadoop jar**: com esse comando, o Hadoop se encarrega de incluir todas as bibliotecas Hadoop necessárias.
@@ -75,7 +75,7 @@ hadoop jar /usr/lib/hadoop-mapreduce/hadoop-streaming.jar\
 
 **-file**: indicamos o local do mapper (FS local).
 
-**--reducer**: indicamos o reducer.
+**-reducer**: indicamos o reducer.
 
 
 Se tudo deu certo (e você pode acompanhar a execução da aplicação usando a interface web do *YARN NodeManager*), o arquivo processado estará disponível (no HDFS) na pasta de saída indicada durante a execução.
@@ -83,6 +83,67 @@ Se tudo deu certo (e você pode acompanhar a execução da aplicação usando a 
 Existem várias formas de ajustar as suas tarefas de Map/Reduce: Você pode controlar o número de mappers, reducers, escolhar e vai compactar ou não a saída, etc.
 
 
+## Contando palavras
+
+Agora que já sabemos como montar um job de MapReduce usando o Hadoop Stream, vamos recriar o famoso contador de palavras em python.
+
+### Mapper
+
+~~~python
+#!/usr/bin/env python3.7
+
+import sys
+import re
+
+
+for line in sys.stdin:
+    words = line.strip().split()
+    for word in words:
+        if word:
+            word = re.sub("[,\.\?;:!]+", "", word.lower())
+            print(f"{word}\t{1}")
+~~~
+
+### Reducer
+
+~~~python
+#!/usr/bin/env python3.7
+
+import sys
+
+prev_word = None
+total = 0
+
+for line in sys.stdin:
+    (word, count) = line.strip().split("\t")
+    if (prev_word) and (prev_word != word):
+        print(f"{prev_word}\t{total}")
+        (prev_word, total) = (word, int(count))
+    else:
+        (prev_word, total) = (word, total + int(count))
+
+if prev_word:
+    print(f"{prev_word}\t{total}")
+~~~
+
+### Preparando e rodando o contador de palavras
+
+
+~~~Bash
+# copiando o arquivo para o HDFS
+hdfs dfs -copyFromLocal text.txt WordCounterDir/text.txt
+
+# rodando o job de MapReduce
+hadoop jar /usr/lib/hadoop-mapreduce/hadoop-streaming.jar\
+-D mapred.reduce.tasks=4 \
+-input text.txt -output WordCounterDir/resultados \
+-mapper map.py \
+-file /home/map.py \
+-reducer reduce.py
+-file /home/reduce.py
+~~~
+
+Pronto! É possível conferir os resultados usando esta ferramenta [online](https://www.wordcounttool.com/).
 
 ## Referências
 
